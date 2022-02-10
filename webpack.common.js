@@ -8,8 +8,6 @@ const PreloadPlugin = require("preload-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const MinifyCssNames = require("mini-css-class-name/css-loader");
-const ObsoleteWebpackPlugin = require("obsolete-webpack-plugin");
-const ScriptExtHtmlWebpackPlugin = require("script-ext-html-webpack-plugin");
 const svgToMiniDataURI = require("mini-svg-data-uri");
 const path = require("path");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
@@ -36,7 +34,7 @@ module.exports = function (env, argv) {
       errorDetails: true,
     },
     // entryPoint for webpack; it can be object with key-value pairs for multibuild (https://webpack.js.org/concepts/entry-points/)
-    entry: path.resolve(srcPath, "main.tsx"),
+    entry: path.resolve(srcPath, "main.jsx"),
 
     output: {
       path: destPath,
@@ -231,13 +229,6 @@ module.exports = function (env, argv) {
               removeScriptTypeAttributes: true,
             },
       }),
-      // todo: watchFix for update to webpack5: https://github.com/GoogleChromeLabs/preload-webpack-plugin/issues/132
-      new PreloadPlugin({
-        // it adds 'preload' tag for async js-files: https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content
-        rel: "preload",
-        include: "initial",
-        fileBlacklist: [/\.map$/, /hot-update\.js$/, /obsolete\.js$/],
-      }),
       new PreloadPlugin({
         // it adds 'prefetch' tag for async js-files: https://developer.mozilla.org/en-US/docs/Web/HTTP/Link_prefetching_FAQ
         rel: "prefetch",
@@ -261,16 +252,6 @@ module.exports = function (env, argv) {
       new webpack.ProgressPlugin(), // it shows progress of building
       new webpack.ProvidePlugin({
         React: "react", // optional: react. it adds [import React from 'react'] as ES6 module to every file into the project
-      }),
-      new ObsoleteWebpackPlugin({
-        // optional: browser: provides popup via alert-script if browser unsupported (according to .browserlistrc)
-        name: "obsolete",
-        promptOnNonTargetBrowser: true, // show popup if browser is not listed in .browserlistrc
-        // optional: browser: [template: 'html string here']
-      }),
-      new ScriptExtHtmlWebpackPlugin({
-        // it adds to obsolete-plugin-script 'async' tag (for perfomance puprpose)
-        async: "obsolete",
       }),
       // optional: new BundleAnalyzerPlugin() // creates bundles-map in browser https://github.com/webpack-contrib/webpack-bundle-analyzer
     ],
